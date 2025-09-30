@@ -11,7 +11,6 @@ import (
 	"github.com/mhsanaei/3x-ui/v2/util/random"
 	"github.com/mhsanaei/3x-ui/v2/web/service"
 	"github.com/mhsanaei/3x-ui/v2/xray"
-	"gopkg.in/yaml.v3"
 )
 
 //go:embed acl4ssr_full.tpl
