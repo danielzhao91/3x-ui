@@ -1,9 +1,9 @@
 package sub
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v2/database/model"
@@ -12,6 +12,9 @@ import (
 	"github.com/mhsanaei/3x-ui/v2/web/service"
 	"github.com/mhsanaei/3x-ui/v2/xray"
 )
+
+//go:embed acl4ssr_full.tpl
+var acl4ssrFullTpl string
 
 // SubClashService handles Clash subscription configuration generation and management.
 type SubClashService struct {
@@ -31,9 +34,6 @@ func NewSubClashService(ruleSet string, subService *SubService) *SubClashService
 
 // GetClash generates a Clash subscription configuration for the given subscription ID and host.
 func (s *SubClashService) GetClash(subId string, host string) (string, string, error) {
-	// Check if acl4ssr_full.tpl template exists
-	templatePath := "3x-ui/sub/acl4ssr_full.tpl"
-
 	inbounds, err := s.SubService.getInboundsBySubId(subId)
 	if err != nil || len(inbounds) == 0 {
 		return "", "", err
@@ -91,14 +91,8 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 		}
 	}
 
-	// Read template file content
-	templateContent, err := os.ReadFile(templatePath)
-	if err != nil {
-		return "", "", err
-	}
-
 	header = fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
-	return string(templateContent), header, nil
+	return acl4ssrFullTpl, header, nil
 }
 
 func (s *SubClashService) getProxies(inbound *model.Inbound, client model.Client, host string) []map[string]any {
