@@ -419,6 +419,8 @@
 "information" = "資訊"
 "language" = "語言"
 "telegramBotLanguage" = "Telegram 機器人語言"
+"clashRuleSet" = "Clash 規則集"
+"clashRuleSetDesc" = "Clash 訂閱的自訂規則"
 
 [pages.xray]
 "title" = "Xray 配置"

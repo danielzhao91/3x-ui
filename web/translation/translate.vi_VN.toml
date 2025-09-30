@@ -419,6 +419,8 @@
 "information" = "Thông tin"
 "language" = "Ngôn ngữ"
 "telegramBotLanguage" = "Ngôn ngữ của Bot Telegram"
+"clashRuleSet" = "Bộ quy tắc Clash"
+"clashRuleSetDesc" = "Các quy tắc tùy chỉnh cho đăng ký Clash"
 
 [pages.xray]
 "title" = "Cài đặt Xray"

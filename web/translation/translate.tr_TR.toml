@@ -419,6 +419,8 @@
 "information" = "Bilgi"
 "language" = "Dil"
 "telegramBotLanguage" = "Telegram Bot Dili"
+"clashRuleSet" = "Clash Kural Seti"
+"clashRuleSetDesc" = "Clash aboneliği için özel kurallar"
 
 [pages.xray]
 "title" = "Xray Yapılandırmaları"

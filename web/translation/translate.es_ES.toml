@@ -419,6 +419,8 @@
 "information" = "Información"
 "language" = "Idioma"
 "telegramBotLanguage" = "Idioma del Bot de Telegram"
+"clashRuleSet" = "Conjunto de Reglas Clash"
+"clashRuleSetDesc" = "Reglas personalizadas para la suscripción Clash"
 
 [pages.xray]
 "title" = "Xray Configuración"

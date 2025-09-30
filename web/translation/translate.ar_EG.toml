@@ -419,6 +419,8 @@
 "information" = "المعلومات"
 "language" = "اللغة"
 "telegramBotLanguage" = "لغة بوت Telegram"
+"clashRuleSet" = "مجموعة قواعد Clash"
+"clashRuleSetDesc" = "قواعد مخصصة لاشتراك Clash"
 
 [pages.xray]
 "title" = "إعدادات Xray"

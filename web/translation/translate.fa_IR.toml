@@ -419,6 +419,8 @@
 "information" = "اطلاعات"
 "language" = "زبان"
 "telegramBotLanguage" = "زبان ربات تلگرام"
+"clashRuleSet" = "مجموعه قوانین Clash"
+"clashRuleSetDesc" = "قوانین سفارشی برای اشتراک Clash"
 
 [pages.xray]
 "title" = "پیکربندی ایکس‌ری"

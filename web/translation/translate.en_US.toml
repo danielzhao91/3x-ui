@@ -419,6 +419,8 @@
 "information" = "Information"
 "language" = "Language"
 "telegramBotLanguage" = "Telegram Bot Language"
+"clashRuleSet" = "Clash Rule Set"
+"clashRuleSetDesc" = "Custom rules for Clash subscription"
 
 [pages.xray]
 "title" = "Xray Configs"
