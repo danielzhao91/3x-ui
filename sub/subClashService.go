@@ -3,7 +3,9 @@ package sub
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
+	"text/template"
 
 	"github.com/mhsanaei/3x-ui/v2/database/model"
 	"github.com/mhsanaei/3x-ui/v2/logger"
@@ -31,6 +33,12 @@ func NewSubClashService(ruleSet string, subService *SubService) *SubClashService
 
 // GetClash generates a Clash subscription configuration for the given subscription ID and host.
 func (s *SubClashService) GetClash(subId string, host string) (string, string, error) {
+	// Check if acl4ssr_full.tpl template exists
+	templatePath := "3x-ui/sub/acl4ssr_full.tpl"
+	if _, err := os.Stat(templatePath); err == nil {
+		return s.GetClashWithTemplate(subId, host, templatePath)
+	}
+
 	inbounds, err := s.SubService.getInboundsBySubId(subId)
 	if err != nil || len(inbounds) == 0 {
 		return "", "", err
@@ -146,6 +154,214 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 
 	header = fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
 	return string(finalYaml), header, nil
+}
+
+// GetClashWithTemplate generates a Clash subscription configuration using a template file
+func (s *SubClashService) GetClashWithTemplate(subId string, host string, templatePath string) (string, string, error) {
+	inbounds, err := s.SubService.getInboundsBySubId(subId)
+	if err != nil || len(inbounds) == 0 {
+		return "", "", err
+	}
+
+	var header string
+	var traffic xray.ClientTraffic
+	var clientTraffics []xray.ClientTraffic
+	var proxies []map[string]any
+
+	// Prepare Inbounds
+	for _, inbound := range inbounds {
+		clients, err := s.inboundService.GetClients(inbound)
+		if err != nil {
+			logger.Error("SubClashService - GetClients: Unable to get clients from inbound")
+		}
+		if clients == nil {
+			continue
+		}
+		if len(inbound.Listen) > 0 && inbound.Listen[0] == '@' {
+			listen, port, streamSettings, err := s.SubService.getFallbackMaster(inbound.Listen, inbound.StreamSettings)
+			if err == nil {
+				inbound.Listen = listen
+				inbound.Port = port
+				inbound.StreamSettings = streamSettings
+			}
+		}
+
+		for _, client := range clients {
+			if client.Enable && client.SubID == subId {
+				clientTraffics = append(clientTraffics, s.SubService.getClientTraffics(inbound.ClientStats, client.Email))
+				newProxies := s.getProxies(inbound, client, host)
+				proxies = append(proxies, newProxies...)
+			}
+		}
+	}
+
+	if len(proxies) == 0 {
+		return "", "", nil
+	}
+
+	// Prepare statistics
+	for index, clientTraffic := range clientTraffics {
+		if index == 0 {
+			traffic.Up = clientTraffic.Up
+			traffic.Down = clientTraffic.Down
+			traffic.Total = clientTraffic.Total
+			if clientTraffic.ExpiryTime > 0 {
+				traffic.ExpiryTime = clientTraffic.ExpiryTime
+			}
+		} else {
+			traffic.Up += clientTraffic.Up
+			traffic.Down += clientTraffic.Down
+			if traffic.Total == 0 || clientTraffic.Total == 0 {
+				traffic.Total = 0
+			} else {
+				traffic.Total += clientTraffic.Total
+			}
+			if clientTraffic.ExpiryTime != traffic.ExpiryTime {
+				traffic.ExpiryTime = 0
+			}
+		}
+	}
+
+	// Read template file
+	tmplContent, err := os.ReadFile(templatePath)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Convert template to string
+	templateStr := string(tmplContent)
+
+	// Generate proxies YAML
+	proxiesYAML, err := yaml.Marshal(proxies)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Generate proxy names for groups
+	proxyNames := make([]string, len(proxies))
+	for i, proxy := range proxies {
+		proxyNames[i] = proxy["name"].(string)
+	}
+
+	// Create a map of proxy group names to their proxies
+	groupProxies := map[string][]string{
+		"🚀 手动切换": proxyNames,
+		"♻️ 自动选择": proxyNames,
+		"🇭🇰 香港节点": proxyNames,
+		"🇯🇵 日本节点": proxyNames,
+		"🇺🇲 美国节点": proxyNames,
+		"🇨🇳 台湾节点": proxyNames,
+		"🇸🇬 狮城节点": proxyNames,
+		"🇰🇷 韩国节点": proxyNames,
+		"🎥 奈飞节点": proxyNames,
+	}
+
+	// Replace proxies section in template
+	lines := strings.Split(templateStr, "\n")
+	var resultLines []string
+	
+	inProxies := false
+	inProxyGroups := false
+	skipSection := false
+	
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		
+		// Check if we're entering proxies section
+		if strings.HasPrefix(trimmedLine, "proxies:") {
+			inProxies = true
+			skipSection = true
+			resultLines = append(resultLines, "proxies:")
+			// Add indented proxies
+			proxiesLines := strings.Split(strings.TrimSpace(string(proxiesYAML)), "\n")
+			for _, pl := range proxiesLines {
+				resultLines = append(resultLines, "  "+pl)
+			}
+			continue
+		}
+		
+		// Check if we're entering proxy-groups section
+		if strings.HasPrefix(trimmedLine, "proxy-groups:") {
+			inProxies = false
+			inProxyGroups = true
+			skipSection = false
+			resultLines = append(resultLines, line)
+			continue
+		}
+		
+		// Check if we're entering rules section
+		if strings.HasPrefix(trimmedLine, "rules:") {
+			inProxies = false
+			inProxyGroups = false
+			skipSection = false
+			resultLines = append(resultLines, line)
+			continue
+		}
+		
+		// Skip lines in proxies section
+		if inProxies && skipSection {
+			if strings.HasPrefix(trimmedLine, "-") || strings.HasPrefix(trimmedLine, "proxy-groups:") ||
+			   strings.HasPrefix(trimmedLine, "rules:") || trimmedLine == "" {
+				inProxies = false
+				skipSection = false
+				// Add the line that ended the section
+				if trimmedLine != "" {
+					resultLines = append(resultLines, line)
+				}
+			}
+			continue
+		}
+		
+		// Process proxy groups and update proxies list
+		if inProxyGroups && strings.HasPrefix(trimmedLine, "- name:") {
+			resultLines = append(resultLines, line)
+			continue
+		}
+		
+		if inProxyGroups && strings.HasPrefix(trimmedLine, "  proxies:") &&
+		   len(resultLines) > 0 && strings.Contains(resultLines[len(resultLines)-1], "name:") {
+			resultLines = append(resultLines, "  proxies:")
+			// Get the group name from the previous line
+			prevLine := resultLines[len(resultLines)-2]
+			groupName := strings.TrimSpace(strings.TrimPrefix(prevLine, "- name:"))
+			groupName = strings.Trim(groupName, "\"'")
+			
+			// If we have specific proxies for this group, replace them
+			if proxies, exists := groupProxies[groupName]; exists {
+				// Add proxies for this group
+				for _, proxy := range proxies {
+					resultLines = append(resultLines, "    - "+proxy)
+				}
+				// Skip the existing proxies lines
+				skipSection = true
+				continue
+			} else {
+				// For other groups, keep existing logic
+				resultLines = append(resultLines, line)
+				skipSection = true
+				continue
+			}
+		}
+		
+		// Skip proxies list in proxy groups if we're replacing them
+		if inProxyGroups && skipSection {
+			if strings.HasPrefix(trimmedLine, "- name:") || strings.HasPrefix(trimmedLine, "rules:") || trimmedLine == "" {
+				skipSection = false
+				// Add the line that ended the section
+				if trimmedLine != "" {
+					resultLines = append(resultLines, line)
+				}
+			}
+			continue
+		}
+		
+		resultLines = append(resultLines, line)
+	}
+
+	result := strings.Join(resultLines, "\n")
+
+	header = fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
+	return result, header, nil
 }
 
 func (s *SubClashService) getProxies(inbound *model.Inbound, client model.Client, host string) []map[string]any {
