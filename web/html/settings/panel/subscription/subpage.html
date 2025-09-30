@@ -95,6 +95,26 @@
                                             </tr-qr-bg>
                                         </tr-qr-box>
                                     </a-col>
+                                    <a-col v-if="app.subClashUrl" :xs="24" :sm="12"
+                                        style="text-align:center;">
+                                        <tr-qr-box class="qr-box">
+                                            <a-tag color="purple"
+                                                class="qr-tag">
+                                                <span>{{ i18n
+                                                    "pages.settings.subSettings"}}
+                                                    Clash</span>
+                                            </a-tag>
+                                            <tr-qr-bg class="qr-bg-sub">
+                                                <tr-qr-bg-inner
+                                                    class="qr-bg-sub-inner">
+                                                    <canvas id="qrcode-subclash"
+                                                        class="qr-cv"
+                                                        title='{{ i18n "copy" }}'
+                                                        @click="copy(app.subClashUrl)"></canvas>
+                                                </tr-qr-bg-inner>
+                                            </tr-qr-bg>
+                                        </tr-qr-box>
+                                    </a-col>
                                 </a-row>
                             </a-space>
                         </a-form-item>
@@ -262,7 +282,9 @@
 
 <!-- Bootstrap data for external JS -->
 <template id="subscription-data" data-sid="{{ .sId }}"
-    data-sub-url="{{ .subUrl }}" data-subjson-url="{{ .subJsonUrl }}"
+    data-sub-url="{{ .subUrl }}"
+    data-subjson-url="{{ .subJsonUrl }}"
+    data-subclash-url="{{ .subClashUrl }}"
     data-download="{{ .download }}"
     data-upload="{{ .upload }}" data-used="{{ .used }}"
     data-total="{{ .total }}" data-remained="{{ .remained }}"

@@ -214,7 +214,7 @@ func (j *LdapSyncJob) batchSetEnable(ib *model.Inbound, emails []string, enable 
         return
     }
 
-    // Prepare JSON for mass update
+    // Подготовка JSON для массового обновления
     clients := make([]model.Client, 0, len(emails))
     for _, email := range emails {
         clients = append(clients, model.Client{
@@ -238,7 +238,7 @@ func (j *LdapSyncJob) batchSetEnable(ib *model.Inbound, emails []string, enable 
     j.xrayService.SetToNeedRestart()
 }
 
-// deleteClientsNotInLDAP deletes clients not in LDAP using batches and a single restart
+// deleteClientsNotInLDAP performs batch deletion of clients not in LDAP
 func (j *LdapSyncJob) deleteClientsNotInLDAP(inboundTag string, ldapEmails map[string]struct{}) {
     inbounds, err := j.inboundService.GetAllInbounds()
     if err != nil {
@@ -246,24 +246,22 @@ func (j *LdapSyncJob) deleteClientsNotInLDAP(inboundTag string, ldapEmails map[s
         return
     }
 
-    batchSize := 50 //  clients in 1 batch 
-    restartNeeded := false
-
     for _, ib := range inbounds {
         if ib.Tag != inboundTag {
             continue
         }
         clients, err := j.inboundService.GetClients(ib)
         if err != nil {
-            logger.Warningf("Failed to get clients for inbound %s: %v", ib.Tag, err)
             continue
         }
 
-        // Collect clients for deletion
+        // Сбор клиентов для удаления
         toDelete := []model.Client{}
         for _, c := range clients {
             if _, ok := ldapEmails[c.Email]; !ok {
-                toDelete = append(toDelete, c)
+                // Use appropriate field depending on protocol
+                client := model.Client{Email: c.Email, ID: c.ID, Password: c.Password}
+                toDelete = append(toDelete, client)
             }
         }
 
@@ -271,47 +269,21 @@ func (j *LdapSyncJob) deleteClientsNotInLDAP(inboundTag string, ldapEmails map[s
             continue
         }
 
-        // Delete in batches
-        for i := 0; i < len(toDelete); i += batchSize {
-            end := i + batchSize
-            if end > len(toDelete) {
-                end = len(toDelete)
-            }
-            batch := toDelete[i:end]
-
-            for _, c := range batch {
-                var clientKey string
-                switch ib.Protocol {
-                case model.Trojan:
-                    clientKey = c.Password
-                case model.Shadowsocks:
-                    clientKey = c.Email
-                default: // vless/vmess
-                    clientKey = c.ID
-                }
-
-                if _, err := j.inboundService.DelInboundClient(ib.Id, clientKey); err != nil {
-                    logger.Warningf("Failed to delete client %s from inbound id=%d(tag=%s): %v",
-                        c.Email, ib.Id, ib.Tag, err)
-                } else {
-                    logger.Infof("Deleted client %s from inbound id=%d(tag=%s)",
-                        c.Email, ib.Id, ib.Tag)
-                    // do not restart here
-                    restartNeeded = true
-                }
-            }
+        payload := &model.Inbound{
+            Id:       ib.Id,
+            Settings: j.clientsToJSON(toDelete),
         }
-    }
 
-    // One time after all batches
-    if restartNeeded {
-        j.xrayService.SetToNeedRestart()
-        logger.Info("Xray restart scheduled after batch deletion")
+        if _, err := j.inboundService.DelInboundClient(payload.Id, payload.Settings); err != nil {
+            logger.Warningf("Batch delete failed for inbound %s: %v", ib.Tag, err)
+        } else {
+            logger.Infof("Batch deleted %d clients from inbound %s", len(toDelete), ib.Tag)
+            j.xrayService.SetToNeedRestart()
+        }
     }
 }
 
-
-// clientsToJSON serializes an array of clients to JSON
+// clientsToJSON сериализует массив клиентов в JSON
 func (j *LdapSyncJob) clientsToJSON(clients []model.Client) string {
     b := strings.Builder{}
     b.WriteString("{\"clients\":[")

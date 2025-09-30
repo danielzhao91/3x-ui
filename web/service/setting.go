@@ -52,6 +52,7 @@ var defaultValueMap = map[string]string{
 	"twoFactorToken":              "",
 	"subEnable":                   "true",
 	"subJsonEnable":               "false",
+	"subClashEnable":              "false",
 	"subTitle":                    "",
 	"subListen":                   "",
 	"subPort":                     "2096",
@@ -65,10 +66,13 @@ var defaultValueMap = map[string]string{
 	"subURI":                      "",
 	"subJsonPath":                 "/json/",
 	"subJsonURI":                  "",
+	"subClashPath":                "/clash/",
+	"subClashURI":                 "",
 	"subJsonFragment":             "",
 	"subJsonNoises":               "",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
+	"subClashRuleSet":             "",
 	"datepicker":                  "gregorian",
 	"warp":                        "",
 	"externalTrafficInformEnable": "false",
@@ -455,6 +459,10 @@ func (s *SettingService) GetSubJsonEnable() (bool, error) {
 	return s.getBool("subJsonEnable")
 }
 
+func (s *SettingService) GetSubClashEnable() (bool, error) {
+	return s.getBool("subClashEnable")
+}
+
 func (s *SettingService) GetSubTitle() (string, error) {
 	return s.getString("subTitle")
 }
@@ -473,6 +481,10 @@ func (s *SettingService) GetSubPath() (string, error) {
 
 func (s *SettingService) GetSubJsonPath() (string, error) {
 	return s.getString("subJsonPath")
+}
+
+func (s *SettingService) GetSubClashPath() (string, error) {
+	return s.getString("subClashPath")
 }
 
 func (s *SettingService) GetSubDomain() (string, error) {
@@ -525,6 +537,14 @@ func (s *SettingService) GetSubJsonMux() (string, error) {
 
 func (s *SettingService) GetSubJsonRules() (string, error) {
 	return s.getString("subJsonRules")
+}
+
+func (s *SettingService) GetSubClashURI() (string, error) {
+	return s.getString("subClashURI")
+}
+
+func (s *SettingService) GetSubClashRuleSet() (string, error) {
+	return s.getString("subClashRuleSet")
 }
 
 func (s *SettingService) GetDatepicker() (string, error) {
@@ -685,9 +705,11 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"tgBotEnable":   func() (any, error) { return s.GetTgbotEnabled() },
 		"subEnable":     func() (any, error) { return s.GetSubEnable() },
 		"subJsonEnable": func() (any, error) { return s.GetSubJsonEnable() },
+		"subClashEnable": func() (any, error) { return s.GetSubClashEnable() },
 		"subTitle":      func() (any, error) { return s.GetSubTitle() },
 		"subURI":        func() (any, error) { return s.GetSubURI() },
 		"subJsonURI":    func() (any, error) { return s.GetSubJsonURI() },
+		"subClashURI":   func() (any, error) { return s.GetSubClashURI() },
 		"remarkModel":   func() (any, error) { return s.GetRemarkModel() },
 		"datepicker":    func() (any, error) { return s.GetDatepicker() },
 		"ipLimitEnable": func() (any, error) { return s.GetIpLimitEnable() },
@@ -710,12 +732,19 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 			subJsonEnable = b
 		}
 	}
-	if (subEnable && result["subURI"].(string) == "") || (subJsonEnable && result["subJsonURI"].(string) == "") {
+	subClashEnable := false
+	if v, ok := result["subClashEnable"]; ok {
+		if b, ok2 := v.(bool); ok2 {
+			subClashEnable = b
+		}
+	}
+	if (subEnable && result["subURI"].(string) == "") || (subJsonEnable && result["subJsonURI"].(string) == "") || (subClashEnable && result["subClashURI"].(string) == "") {
 		subURI := ""
 		subTitle, _ := s.GetSubTitle()
 		subPort, _ := s.GetSubPort()
 		subPath, _ := s.GetSubPath()
 		subJsonPath, _ := s.GetSubJsonPath()
+		subClashPath, _ := s.GetSubClashPath()
 		subDomain, _ := s.GetSubDomain()
 		subKeyFile, _ := s.GetSubKeyFile()
 		subCertFile, _ := s.GetSubCertFile()
@@ -744,6 +773,9 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		}
 		if subJsonEnable && result["subJsonURI"].(string) == "" {
 			result["subJsonURI"] = subURI + subJsonPath
+		}
+		if subClashEnable && result["subClashURI"].(string) == "" {
+			result["subClashURI"] = subURI + subClashPath
 		}
 	}
 

@@ -1,0 +1,40 @@
+{{define "settings/panel/subscription/clash"}}
+<a-collapse default-active-key="1">
+    <a-collapse-panel key="1" header='{{ i18n "pages.xray.generalConfigs"}}'>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.subPath"}}</template>
+            <template #description>{{ i18n "pages.settings.subPathDesc"}}</template>
+            <template #control>
+                <a-input
+                    type="text"
+                    v-model="allSetting.subClashPath"
+                    @input="allSetting.subClashPath = ((typeof $event === 'string' ? $event : ($event && $event.target ? $event.target.value : '')) || '').replace(/[:*]/g, '')"
+                    @blur="allSetting.subClashPath = (p => { p = p || '/'; if (!p.startsWith('/')) p='/' + p; if (!p.endsWith('/')) p += '/'; return p.replace(/\/+/g,'/'); })(allSetting.subClashPath)"
+                    placeholder="/clash/"
+                ></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.subURI"}}</template>
+            <template #description>{{ i18n "pages.settings.subURIDesc"}}</template>
+            <template #control>
+                <a-input type="text" placeholder="(http|https)://domain[:port]/path/"
+                    v-model="allSetting.subClashURI"></a-input>
+            </template>
+        </a-setting-list-item>
+    </a-collapse-panel>
+    <a-collapse-panel key="2" header='{{ i18n "pages.settings.clashRuleSet"}}'>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.clashRuleSet"}}</template>
+            <template #description>{{ i18n "pages.settings.clashRuleSetDesc"}}</template>
+            <template #control>
+                <a-textarea
+                    :auto-size="{ minRows: 3, maxRows: 6 }"
+                    placeholder='domain:example.com,proxy&#10;ipcidr:1.1.1.1/32,proxy'
+                    v-model="allSetting.subClashRuleSet">
+                </a-textarea>
+            </template>
+        </a-setting-list-item>
+    </a-collapse-panel>
+</a-collapse>
+{{end}}

@@ -15,12 +15,15 @@ type SUBController struct {
 	subTitle       string
 	subPath        string
 	subJsonPath    string
+	subClashPath   string
 	jsonEnabled    bool
+	clashEnabled   bool
 	subEncrypt     bool
 	updateInterval string
 
 	subService     *SubService
 	subJsonService *SubJsonService
+	subClashService *SubClashService
 }
 
 // NewSUBController creates a new subscription controller with the given configuration.
@@ -28,7 +31,9 @@ func NewSUBController(
 	g *gin.RouterGroup,
 	subPath string,
 	jsonPath string,
+	clashPath string,
 	jsonEnabled bool,
+	clashEnabled bool,
 	encrypt bool,
 	showInfo bool,
 	rModel string,
@@ -37,6 +42,7 @@ func NewSUBController(
 	jsonNoise string,
 	jsonMux string,
 	jsonRules string,
+	clashRuleSet string,
 	subTitle string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
@@ -44,12 +50,15 @@ func NewSUBController(
 		subTitle:       subTitle,
 		subPath:        subPath,
 		subJsonPath:    jsonPath,
+		subClashPath:   clashPath,
 		jsonEnabled:    jsonEnabled,
+		clashEnabled:   clashEnabled,
 		subEncrypt:     encrypt,
 		updateInterval: update,
 
-		subService:     sub,
-		subJsonService: NewSubJsonService(jsonFragment, jsonNoise, jsonMux, jsonRules, sub),
+		subService:      sub,
+		subJsonService:  NewSubJsonService(jsonFragment, jsonNoise, jsonMux, jsonRules, sub),
+		subClashService: NewSubClashService(clashRuleSet, sub),
 	}
 	a.initRouter(g)
 	return a
@@ -63,6 +72,10 @@ func (a *SUBController) initRouter(g *gin.RouterGroup) {
 	if a.jsonEnabled {
 		gJson := g.Group(a.subJsonPath)
 		gJson.GET(":subid", a.subJsons)
+	}
+	if a.clashEnabled {
+		gJson := g.Group(a.subClashPath)
+		gJson.GET(":subid", a.subClashes)
 	}
 }
 
@@ -83,9 +96,12 @@ func (a *SUBController) subs(c *gin.Context) {
 		accept := c.GetHeader("Accept")
 		if strings.Contains(strings.ToLower(accept), "text/html") || c.Query("html") == "1" || strings.EqualFold(c.Query("view"), "html") {
 			// Build page data in service
-			subURL, subJsonURL := a.subService.BuildURLs(scheme, hostWithPort, a.subPath, a.subJsonPath, subId)
+			subURL, subJsonURL, subClashURL := a.subService.BuildURLs(scheme, hostWithPort, a.subPath, a.subJsonPath, a.subClashPath, subId)
 			if !a.jsonEnabled {
 				subJsonURL = ""
+			}
+			if !a.clashEnabled {
+				subClashURL = ""
 			}
 			// Get base_path from context (set by middleware)
 			basePath, exists := c.Get("base_path")
@@ -100,7 +116,7 @@ func (a *SUBController) subs(c *gin.Context) {
 				// Remove trailing slash if exists, add subId, then add trailing slash
 				basePathStr = strings.TrimRight(basePathStr, "/") + "/" + subId + "/"
 			}
-			page := a.subService.BuildPageData(subId, hostHeader, traffic, lastOnline, subs, subURL, subJsonURL, basePathStr)
+			page := a.subService.BuildPageData(subId, hostHeader, traffic, lastOnline, subs, subURL, subJsonURL, subClashURL, basePathStr)
 			c.HTML(200, "subpage.html", gin.H{
 				"title":        "subscription.title",
 				"cur_ver":      config.GetVersion(),
@@ -120,6 +136,7 @@ func (a *SUBController) subs(c *gin.Context) {
 				"totalByte":    page.TotalByte,
 				"subUrl":       page.SubUrl,
 				"subJsonUrl":   page.SubJsonUrl,
+				"subClashUrl":   page.SubClashUrl,
 				"result":       page.Result,
 			})
 			return
@@ -150,6 +167,21 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		a.ApplyCommonHeaders(c, header, a.updateInterval, a.subTitle)
 
 		c.String(200, jsonSub)
+	}
+}
+
+func (a *SUBController) subClashes(c *gin.Context) {
+	subId := c.Param("subid")
+	_, host, _, _ := a.subService.ResolveRequest(c)
+	clashSub, header, err := a.subClashService.GetClash(subId, host)
+	if err != nil || len(clashSub) == 0 {
+		c.String(400, "Error!")
+	} else {
+
+		// Add headers
+		a.ApplyCommonHeaders(c, header, a.updateInterval, a.subTitle)
+
+		c.String(200, clashSub)
 	}
 }
 

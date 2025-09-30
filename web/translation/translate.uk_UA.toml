@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "Стандартний URI-шлях панелі небезпечний. Будь ласка, сконфігуруйте складний URI-шлях."
 "secAlertSubURI" = "Стандартний URI-шлях підписки небезпечний. Будь ласка, сконфігуруйте складний URI-шлях."
 "secAlertSubJsonURI" = "Стандартний URI-шлях JSON підписки небезпечний. Будь ласка, сконфігуруйте складний URI-шлях."
+"secAlertSubClashURI" = "Стандартний URI-шлях Clash підписки небезпечний. Будь ласка, сконфігуруйте складний URI-шлях."
 "emptyDnsDesc" = "Немає доданих DNS-серверів."
 "emptyFakeDnsDesc" = "Немає доданих Fake DNS-серверів."
 "emptyBalancersDesc" = "Немає доданих балансувальників."
@@ -372,6 +373,7 @@
 "subEnable" = "Увімкнути службу підписки"
 "subEnableDesc" = "Вмикає службу підписки."
 "subJsonEnable" = "Увімкнути/вимкнути JSON-кінець підписки незалежно."
+"subClashEnable" = "Увімкнути/вимкнути Clash-кінець підписки незалежно."
 "subTitle" = "Назва Підписки"
 "subTitleDesc" = "Назва, яка відображається у VPN-клієнті"
 "subListen" = "Слухати IP"
@@ -417,6 +419,8 @@
 "information" = "Інформація"
 "language" = "Мова"
 "telegramBotLanguage" = "Мова Telegram-бота"
+"clashRuleSet" = "Набір правил Clash"
+"clashRuleSetDesc" = "Користувацькі правила для підписки Clash"
 
 [pages.xray]
 "title" = "Xray конфігурації"

@@ -28,11 +28,13 @@ class AllSetting {
         this.xrayTemplateConfig = "";
         this.subEnable = true;
         this.subJsonEnable = false;
+        this.subClashEnable = false;
         this.subTitle = "";
         this.subListen = "";
         this.subPort = 2096;
         this.subPath = "/sub/";
         this.subJsonPath = "/json/";
+        this.subClashPath = "/clash/";
         this.subDomain = "";
         this.externalTrafficInformEnable = false;
         this.externalTrafficInformURI = "";
@@ -47,6 +49,8 @@ class AllSetting {
         this.subJsonNoises = "";
         this.subJsonMux = "";
         this.subJsonRules = "";
+        this.subClashURI = "";
+        this.subClashRuleSet = "";
 
         this.timeLocation = "Local";
 
