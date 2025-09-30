@@ -77,9 +77,6 @@ var defaultValueMap = map[string]string{
 	"warp":                        "",
 	"externalTrafficInformEnable": "false",
 	"externalTrafficInformURI":    "",
-	"subClashPath":                "/clash/",
-	"subClashURI":                 "",
-	"subClashRuleSet":             "",
 	// LDAP defaults
 	"ldapEnable":                  "false",
 	"ldapHost":                    "",
