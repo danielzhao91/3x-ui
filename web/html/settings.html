@@ -556,6 +556,10 @@
             subJsonPath = this.allSetting.subJsonURI.length > 0 ? new URL(this.allSetting.subJsonURI).pathname : this.allSetting.subJsonPath;
             if (subJsonPath == '/json/') alerts.push('{{ i18n "secAlertSubJsonURI" }}');
           }
+          if (this.allSetting.subClashEnable) {
+            subClashPath = this.allSetting.subClashURI.length > 0 ? new URL(this.allSetting.subClashURI).pathname : this.allSetting.subClashPath;
+            if (subClashPath == '/clash/') alerts.push('{{ i18n "secAlertSubClashURI" }}');
+          }
           return alerts
         }
       }
