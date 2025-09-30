@@ -372,6 +372,7 @@
 "subEnable" = "Habilitar Servicio"
 "subEnableDesc" = "Función de suscripción con configuración separada."
 "subJsonEnable" = "Habilitar/Deshabilitar el endpoint de suscripción JSON de forma independiente."
+"subClashEnable" = "Habilitar/Deshabilitar el endpoint de suscripción CLASH de forma independiente."
 "subTitle" = "Título de la Suscripción"
 "subTitleDesc" = "Título mostrado en el cliente de VPN"
 "subListen" = "Listening IP"

@@ -372,6 +372,7 @@
 "subEnable" = "Aktifkan Layanan Langganan"
 "subEnableDesc" = "Mengaktifkan layanan langganan."
 "subJsonEnable" = "Aktifkan/Nonaktifkan endpoint langganan JSON secara mandiri."
+"subClashEnable" = "Aktifkan/Nonaktifkan endpoint langganan CLASH secara mandiri."
 "subTitle" = "Judul Langganan"
 "subTitleDesc" = "Judul yang ditampilkan di klien VPN"
 "subListen" = "IP Pendengar"
