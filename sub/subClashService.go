@@ -11,6 +11,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v2/util/random"
 	"github.com/mhsanaei/3x-ui/v2/web/service"
 	"github.com/mhsanaei/3x-ui/v2/xray"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed acl4ssr_full.tpl
@@ -42,6 +43,7 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 	var header string
 	var traffic xray.ClientTraffic
 	var clientTraffics []xray.ClientTraffic
+	var proxies []map[string]any
 
 	// Prepare Inbounds
 	for _, inbound := range inbounds {
@@ -64,8 +66,14 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 		for _, client := range clients {
 			if client.Enable && client.SubID == subId {
 				clientTraffics = append(clientTraffics, s.SubService.getClientTraffics(inbound.ClientStats, client.Email))
+				newProxies := s.getProxies(inbound, client, host)
+				proxies = append(proxies, newProxies...)
 			}
 		}
+	}
+
+	if len(proxies) == 0 {
+		return "", "", nil
 	}
 
 	// Prepare statistics
@@ -91,8 +99,43 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 		}
 	}
 
+	// Parse template
+	var config map[string]any
+	err = yaml.Unmarshal([]byte(acl4ssrFullTpl), &config)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Add proxies to config
+	config["proxies"] = proxies
+
+	// Update proxy groups with proxy names
+	if proxyGroups, ok := config["proxy-groups"].([]any); ok {
+		// Get proxy names
+		proxyNames := make([]string, len(proxies))
+		for i, proxy := range proxies {
+			proxyNames[i] = proxy["name"].(string)
+		}
+
+		// Update proxy groups that have empty proxies list
+		for _, group := range proxyGroups {
+			if groupMap, ok := group.(map[string]any); ok {
+				if proxiesList, ok := groupMap["proxies"].([]any); ok && len(proxiesList) == 0 {
+					// Add proxy names to the group
+					groupMap["proxies"] = proxyNames
+				}
+			}
+		}
+	}
+
+	// Marshal config back to YAML
+	finalYaml, err := yaml.Marshal(config)
+	if err != nil {
+		return "", "", err
+	}
+
 	header = fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
-	return acl4ssrFullTpl, header, nil
+	return string(finalYaml), header, nil
 }
 
 func (s *SubClashService) getProxies(inbound *model.Inbound, client model.Client, host string) []map[string]any {
