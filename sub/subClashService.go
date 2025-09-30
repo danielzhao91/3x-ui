@@ -99,43 +99,71 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 		}
 	}
 
-	// Parse template
-	var config map[string]any
-	err = yaml.Unmarshal([]byte(acl4ssrFullTpl), &config)
-	if err != nil {
-		return "", "", err
+	// Format proxies section
+	proxiesSection := "proxies:\n"
+	for _, proxy := range proxies {
+		proxiesSection += s.formatProxy(proxy) + "\n"
 	}
 
-	// Add proxies to config
-	config["proxies"] = proxies
-
-	// Update proxy groups with proxy names
-	if proxyGroups, ok := config["proxy-groups"].([]any); ok {
-		// Get proxy names
-		proxyNames := make([]string, len(proxies))
-		for i, proxy := range proxies {
-			proxyNames[i] = proxy["name"].(string)
-		}
-
-		// Update proxy groups that have empty proxies list
-		for _, group := range proxyGroups {
-			if groupMap, ok := group.(map[string]any); ok {
-				if proxiesList, ok := groupMap["proxies"].([]any); ok && len(proxiesList) == 0 {
-					// Add proxy names to the group
-					groupMap["proxies"] = proxyNames
-				}
-			}
+	// Replace proxies section in template
+	templateLines := strings.Split(acl4ssrFullTpl, "\n")
+	var resultLines []string
+	proxiesSectionFound := false
+	
+	for _, line := range templateLines {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine == "proxies:" {
+			proxiesSectionFound = true
+			resultLines = append(resultLines, proxiesSection[:len(proxiesSection)-1]) // Remove trailing newline
+		} else if proxiesSectionFound && (strings.HasPrefix(trimmedLine, "proxy-groups:") || strings.HasPrefix(trimmedLine, "rules:")) {
+			proxiesSectionFound = false
+			resultLines = append(resultLines, line)
+		} else if !proxiesSectionFound {
+			resultLines = append(resultLines, line)
 		}
 	}
-
-	// Marshal config back to YAML
-	finalYaml, err := yaml.Marshal(config)
-	if err != nil {
-		return "", "", err
+	
+	// If proxies section was not found, append it
+	if !proxiesSectionFound {
+		resultLines = append(resultLines, proxiesSection[:len(proxiesSection)-1]) // Remove trailing newline
 	}
 
 	header = fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
-	return string(finalYaml), header, nil
+	return strings.Join(resultLines, "\n"), header, nil
+}
+
+// formatProxy formats a proxy map to a string in the required format
+func (s *SubClashService) formatProxy(proxy map[string]any) string {
+	// Start with the proxy name and opening brace
+	result := "  - {name: " + proxy["name"].(string)
+	
+	// Add all other fields
+	for key, value := range proxy {
+		if key == "name" {
+			continue // Already added
+		}
+		
+		// Format the value based on its type
+		var formattedValue string
+		switch v := value.(type) {
+		case string:
+			formattedValue = v
+		case int:
+			formattedValue = fmt.Sprintf("%d", v)
+		case bool:
+			formattedValue = fmt.Sprintf("%t", v)
+		default:
+			formattedValue = fmt.Sprintf("%v", v)
+		}
+		
+		// Add the field to the result
+		result += ", " + key + ": " + formattedValue
+	}
+	
+	// Close the brace
+	result += "}"
+	
+	return result
 }
 
 func (s *SubClashService) getProxies(inbound *model.Inbound, client model.Client, host string) []map[string]any {
