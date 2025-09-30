@@ -1083,7 +1083,7 @@ func (s *SubService) ResolveRequest(c *gin.Context) (scheme string, host string,
 func (s *SubService) BuildURLs(scheme, hostWithPort, subPath, subJsonPath, subClashPath, subId string) (subURL, subJsonURL, subClashURL string) {
 	// Input validation
 	if subId == "" {
-		return "", ""
+		return "", "", ""
 	}
 
 	// Get configured URIs first (highest priority)
