@@ -242,19 +242,6 @@ func (s *SubClashService) GetClashWithTemplate(subId string, host string, templa
 		proxyNames[i] = proxy["name"].(string)
 	}
 
-	// Create a map of proxy group names to their proxies
-	groupProxies := map[string][]string{
-		"🚀 手动切换": proxyNames,
-		"♻️ 自动选择": proxyNames,
-		"🇭🇰 香港节点": proxyNames,
-		"🇯🇵 日本节点": proxyNames,
-		"🇺🇲 美国节点": proxyNames,
-		"🇨🇳 台湾节点": proxyNames,
-		"🇸🇬 狮城节点": proxyNames,
-		"🇰🇷 韩国节点": proxyNames,
-		"🎥 奈飞节点": proxyNames,
-	}
-
 	// Replace proxies section in template
 	lines := strings.Split(templateStr, "\n")
 	var resultLines []string
@@ -312,48 +299,41 @@ func (s *SubClashService) GetClashWithTemplate(subId string, host string, templa
 		}
 		
 		// Process proxy groups and update proxies list
-		if inProxyGroups && strings.HasPrefix(trimmedLine, "- name:") {
-			resultLines = append(resultLines, line)
-			continue
-		}
-		
-		if inProxyGroups && strings.HasPrefix(trimmedLine, "  proxies:") &&
-		   len(resultLines) > 0 && strings.Contains(resultLines[len(resultLines)-1], "name:") {
-			resultLines = append(resultLines, "  proxies:")
-			// Get the group name from the previous line
-			prevLine := resultLines[len(resultLines)-2]
-			groupName := strings.TrimSpace(strings.TrimPrefix(prevLine, "- name:"))
-			groupName = strings.Trim(groupName, "\"'")
-			
-			// If we have specific proxies for this group, replace them
-			if proxies, exists := groupProxies[groupName]; exists {
-				// Add proxies for this group
-				for _, proxy := range proxies {
-					resultLines = append(resultLines, "    - "+proxy)
-				}
-				// Skip the existing proxies lines
-				skipSection = true
-				continue
-			} else {
-				// For other groups, keep existing logic
+		if inProxyGroups {
+			// Check if this line defines a group name
+			if strings.HasPrefix(trimmedLine, "- name:") {
 				resultLines = append(resultLines, line)
+				continue
+			}
+			
+			// Check if this line defines proxies for a group
+			if strings.HasPrefix(trimmedLine, "  proxies:") {
+				resultLines = append(resultLines, "  proxies:")
+				// Skip the existing proxies lines and add our dynamic proxies
 				skipSection = true
+				// Add all proxy names to this group
+				for _, proxyName := range proxyNames {
+					resultLines = append(resultLines, "    - "+proxyName)
+				}
+				continue
+			}
+			
+			// Skip existing proxy list lines in groups
+			if skipSection {
+				// Check if we're at the end of the proxies section for this group
+				if strings.HasPrefix(trimmedLine, "- name:") || strings.HasPrefix(trimmedLine, "rules:") ||
+				   trimmedLine == "" || !strings.HasPrefix(line, "      ") {
+					skipSection = false
+					// Add the line that ended the section if it's not empty
+					if trimmedLine != "" && !strings.HasPrefix(trimmedLine, "- name:") {
+						resultLines = append(resultLines, line)
+					}
+				}
 				continue
 			}
 		}
 		
-		// Skip proxies list in proxy groups if we're replacing them
-		if inProxyGroups && skipSection {
-			if strings.HasPrefix(trimmedLine, "- name:") || strings.HasPrefix(trimmedLine, "rules:") || trimmedLine == "" {
-				skipSection = false
-				// Add the line that ended the section
-				if trimmedLine != "" {
-					resultLines = append(resultLines, line)
-				}
-			}
-			continue
-		}
-		
+		// Add all other lines
 		resultLines = append(resultLines, line)
 	}
 
