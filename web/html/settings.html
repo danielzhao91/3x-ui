@@ -86,6 +86,13 @@
                     </template>
                     {{ template "settings/panel/subscription/json" . }}
                   </a-tab-pane>
+                  <a-tab-pane key="6" v-if="allSetting.subClashEnable" :style="{ paddingTop: '20px' }">
+                    <template #tab>
+                      <a-icon type="code"></a-icon>
+                      <span>{{ i18n "pages.settings.subSettings" }} (CLASH)</span>
+                    </template>
+                    {{ template "settings/panel/subscription/clash" . }}
+                  </a-tab-pane>
                 </a-tabs>
               </a-col>
             </a-row>

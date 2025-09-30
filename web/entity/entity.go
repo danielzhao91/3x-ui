@@ -56,6 +56,7 @@ type AllSetting struct {
 	// Subscription server settings
 	SubEnable                   bool   `json:"subEnable" form:"subEnable"`                                     // Enable subscription server
 	SubJsonEnable               bool   `json:"subJsonEnable" form:"subJsonEnable"`                             // Enable JSON subscription endpoint
+	SubClashEnable              bool   `json:"subClashEnable" form:"subClashEnable"`                           // Enable Clash subscription endpoint
 	SubTitle                    string `json:"subTitle" form:"subTitle"`                                       // Subscription title
 	SubListen                   string `json:"subListen" form:"subListen"`                                     // Subscription server listen IP
 	SubPort                     int    `json:"subPort" form:"subPort"`                                         // Subscription server port
@@ -71,10 +72,13 @@ type AllSetting struct {
 	SubURI                      string `json:"subURI" form:"subURI"`                                           // Subscription server URI
 	SubJsonPath                 string `json:"subJsonPath" form:"subJsonPath"`                                 // Path for JSON subscription endpoint
 	SubJsonURI                  string `json:"subJsonURI" form:"subJsonURI"`                                   // JSON subscription server URI
+	SubClashPath                string `json:"subClashPath" form:"subClashPath"`                               // Path for Clash subscription endpoint
+	SubClashURI                 string `json:"subClashURI" form:"subClashURI"`                                 // Clash subscription server URI
 	SubJsonFragment             string `json:"subJsonFragment" form:"subJsonFragment"`                         // JSON subscription fragment configuration
 	SubJsonNoises               string `json:"subJsonNoises" form:"subJsonNoises"`                             // JSON subscription noise configuration
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`                                   // JSON subscription mux configuration
-	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`    
+	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
+	SubClashRuleSet             string `json:"subClashRuleSet" form:"subClashRuleSet"`                         // Clash subscription ruleset
 	
 	// LDAP settings
 	LdapEnable                  bool   `json:"ldapEnable" form:"ldapEnable"`

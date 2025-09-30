@@ -97,6 +97,17 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		return nil, err
 	}
 
+	ClashPath, err := s.settingService.GetSubClashPath()
+	if err != nil {
+		return nil, err
+	}
+
+	// Determine if JSON subscription endpoint is enabled
+	subClashEnable, err := s.settingService.GetSubClashEnable()
+	if err != nil {
+		return nil, err
+	}
+
 	// Set base_path based on LinksPath for template rendering
 	// Ensure LinksPath ends with "/" for proper asset URL generation
 	basePath := LinksPath
@@ -146,6 +157,11 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	SubJsonRules, err := s.settingService.GetSubJsonRules()
 	if err != nil {
 		SubJsonRules = ""
+	}
+
+	SubClashRuleSet, err := s.settingService.GetSubClashRuleSet()
+	if err != nil {
+		SubClashRuleSet = ""
 	}
 
 	SubTitle, err := s.settingService.GetSubTitle()
@@ -230,8 +246,8 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g := engine.Group("/")
 
 	s.sub = NewSUBController(
-		g, LinksPath, JsonPath, subJsonEnable, Encrypt, ShowInfo, RemarkModel, SubUpdates,
-		SubJsonFragment, SubJsonNoises, SubJsonMux, SubJsonRules, SubTitle)
+		g, LinksPath, JsonPath, ClashPath, subJsonEnable, subClashEnable, Encrypt, ShowInfo, RemarkModel, SubUpdates,
+		SubJsonFragment, SubJsonNoises, SubJsonMux, SubJsonRules, SubClashRuleSet, SubTitle)
 
 	return engine, nil
 }
