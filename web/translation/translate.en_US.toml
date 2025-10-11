@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "Panel default URI path is insecure. Please configure a complex URI path."
 "secAlertSubURI" = "Subscription default URI path is insecure. Please configure a complex URI path."
 "secAlertSubJsonURI" = "Subscription JSON default URI path is insecure. Please configure a complex URI path."
+"secAlertSubClashURI" = "Subscription Clash default URI path is insecure. Please configure a complex URI path."
 "emptyDnsDesc" = "No added DNS servers."
 "emptyFakeDnsDesc" = "No added Fake DNS servers."
 "emptyBalancersDesc" = "No added balancers."
@@ -372,6 +373,7 @@
 "subEnable" = "Subscription Service"
 "subEnableDesc" = "Enable/Disable the subscription service."
 "subJsonEnable" = "Enable/Disable the JSON subscription endpoint independently."
+"subClashEnable" = "Enable/Disable the Clash subscription endpoint independently."
 "subTitle" = "Subscription Title"
 "subTitleDesc" = "Title shown in VPN client"
 "subListen" = "Listen IP"
@@ -417,6 +419,8 @@
 "information" = "Information"
 "language" = "Language"
 "telegramBotLanguage" = "Telegram Bot Language"
+"clashRuleSet" = "Clash Rule Set"
+"clashRuleSetDesc" = "Custom rules for Clash subscription"
 
 [pages.xray]
 "title" = "Xray Configs"

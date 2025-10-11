@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "Jalur URI default panel tidak aman. Harap konfigurasi jalur URI kompleks."
 "secAlertSubURI" = "Jalur URI default langganan tidak aman. Harap konfigurasi jalur URI kompleks."
 "secAlertSubJsonURI" = "Jalur URI default JSON langganan tidak aman. Harap konfigurasikan jalur URI kompleks."
+"secAlertSubClashURI" = "Jalur URI default CLASH langganan tidak aman. Harap konfigurasikan jalur URI kompleks."
 "emptyDnsDesc" = "Tidak ada server DNS yang ditambahkan."
 "emptyFakeDnsDesc" = "Tidak ada server Fake DNS yang ditambahkan."
 "emptyBalancersDesc" = "Tidak ada penyeimbang yang ditambahkan."
@@ -372,6 +373,7 @@
 "subEnable" = "Aktifkan Layanan Langganan"
 "subEnableDesc" = "Mengaktifkan layanan langganan."
 "subJsonEnable" = "Aktifkan/Nonaktifkan endpoint langganan JSON secara mandiri."
+"subClashEnable" = "Aktifkan/Nonaktifkan endpoint langganan CLASH secara mandiri."
 "subTitle" = "Judul Langganan"
 "subTitleDesc" = "Judul yang ditampilkan di klien VPN"
 "subListen" = "IP Pendengar"
@@ -417,6 +419,8 @@
 "information" = "Informasi"
 "language" = "Bahasa"
 "telegramBotLanguage" = "Bahasa Bot Telegram"
+"clashRuleSet" = "Aturan Clash"
+"clashRuleSetDesc" = "Aturan khusus untuk langganan Clash"
 
 [pages.xray]
 "title" = "Konfigurasi Xray"

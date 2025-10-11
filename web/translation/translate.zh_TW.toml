@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "面板預設 URI 路徑不安全。請配置複雜的 URI 路徑。"
 "secAlertSubURI" = "訂閱預設 URI 路徑不安全。請配置複雜的 URI 路徑。"
 "secAlertSubJsonURI" = "訂閱 JSON 預設 URI 路徑不安全。請配置複雜的 URI 路徑。"
+"secAlertSubClashURI" = "訂閱 CLASH 預設 URI 路徑不安全。請配置複雜的 URI 路徑。"
 "emptyDnsDesc" = "未添加DNS伺服器。"
 "emptyFakeDnsDesc" = "未添加Fake DNS伺服器。"
 "emptyBalancersDesc" = "未添加負載平衡器。"
@@ -372,6 +373,7 @@
 "subEnable" = "啟用訂閱服務"
 "subEnableDesc" = "啟用訂閱服務功能"
 "subJsonEnable" = "獨立啟用/停用 JSON 訂閱端點。"
+"subClashEnable" = "獨立啟用/停用 Clash 訂閱端點。"
 "subTitle" = "訂閱標題"
 "subTitleDesc" = "在VPN客戶端中顯示的標題"
 "subListen" = "監聽 IP"
@@ -417,6 +419,8 @@
 "information" = "資訊"
 "language" = "語言"
 "telegramBotLanguage" = "Telegram 機器人語言"
+"clashRuleSet" = "Clash 規則集"
+"clashRuleSetDesc" = "Clash 訂閱的自訂規則"
 
 [pages.xray]
 "title" = "Xray 配置"

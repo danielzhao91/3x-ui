@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "O caminho URI padrão do painel não é seguro. Configure um caminho URI complexo."
 "secAlertSubURI" = "O caminho URI padrão de inscrição não é seguro. Configure um caminho URI complexo."
 "secAlertSubJsonURI" = "O caminho URI JSON de inscrição padrão não é seguro. Configure um caminho URI complexo."
+"secAlertSubClashURI" = "O caminho URI padrão da assinatura Clash não é seguro. Configure um caminho URI complexo."
 "emptyDnsDesc" = "Nenhum servidor DNS adicionado."
 "emptyFakeDnsDesc" = "Nenhum servidor Fake DNS adicionado."
 "emptyBalancersDesc" = "Nenhum balanceador adicionado."
@@ -372,6 +373,7 @@
 "subEnable" = "Ativar Serviço de Assinatura"
 "subEnableDesc" = "Ativa o serviço de assinatura."
 "subJsonEnable" = "Ativar/Desativar o endpoint de assinatura JSON de forma independente."
+"subClashEnable" = "Ativar/Desativar o endpoint de assinatura CLASH de forma independente."
 "subTitle" = "Título da Assinatura"
 "subTitleDesc" = "Título exibido no cliente VPN"
 "subListen" = "IP de Escuta"
@@ -417,6 +419,8 @@
 "information" = "Informação"
 "language" = "Idioma"
 "telegramBotLanguage" = "Idioma do Bot do Telegram"
+"clashRuleSet" = "Conjunto de Regras Clash"
+"clashRuleSetDesc" = "Regras personalizadas para assinatura Clash"
 
 [pages.xray]
 "title" = "Configurações Xray"

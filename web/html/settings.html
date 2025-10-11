@@ -89,6 +89,13 @@
                     </template>
                     {{ template "settings/panel/subscription/json" . }}
                   </a-tab-pane>
+                  <a-tab-pane key="6" v-if="allSetting.subClashEnable" :style="{ paddingTop: '20px' }">
+                    <template #tab>
+                      <a-icon type="code"></a-icon>
+                      <span>{{ i18n "pages.settings.subSettings" }} (CLASH)</span>
+                    </template>
+                    {{ template "settings/panel/subscription/clash" . }}
+                  </a-tab-pane>
                 </a-tabs>
               </a-col>
             </a-row>
@@ -562,6 +569,10 @@
           if (this.allSetting.subJsonEnable) {
             subJsonPath = this.allSetting.subJsonURI.length > 0 ? new URL(this.allSetting.subJsonURI).pathname : this.allSetting.subJsonPath;
             if (subJsonPath == '/json/') alerts.push('{{ i18n "secAlertSubJsonURI" }}');
+          }
+          if (this.allSetting.subClashEnable) {
+            subClashPath = this.allSetting.subClashURI.length > 0 ? new URL(this.allSetting.subClashURI).pathname : this.allSetting.subClashPath;
+            if (subClashPath == '/clash/') alerts.push('{{ i18n "secAlertSubClashURI" }}');
           }
           return alerts
         }

@@ -2190,13 +2190,13 @@ func (t *Tgbot) SendMsgToTgbot(chatId int64, msg string, replyMarkup ...telego.R
 	}
 }
 
-// buildSubscriptionURLs builds the HTML sub page URL and JSON subscription URL for a client email
-func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
+// buildSubscriptionURLs builds the HTML sub page URL, JSON subscription URL, and Clash subscription URL for a client email
+func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, string, error) {
 	// Resolve subId from client email
 	traffic, client, err := t.inboundService.GetClientByEmail(email)
 	_ = traffic
 	if err != nil || client == nil {
-		return "", "", errors.New("client not found")
+		return "", "", "", errors.New("client not found")
 	}
 
 	// Gather settings to construct absolute URLs
@@ -2204,7 +2204,9 @@ func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
 	subPort, _ := t.settingService.GetSubPort()
 	subPath, _ := t.settingService.GetSubPath()
 	subJsonPath, _ := t.settingService.GetSubJsonPath()
+	subClashPath, _ := t.settingService.GetSubClashPath()
 	subJsonEnable, _ := t.settingService.GetSubJsonEnable()
+	subClashEnable, _ := t.settingService.GetSubClashEnable()
 	subKeyFile, _ := t.settingService.GetSubKeyFile()
 	subCertFile, _ := t.settingService.GetSubCertFile()
 
@@ -2246,18 +2248,28 @@ func (t *Tgbot) buildSubscriptionURLs(email string) (string, string, error) {
 	if !strings.HasSuffix(subJsonPath, "/") {
 		subJsonPath = subJsonPath + "/"
 	}
+	if !strings.HasPrefix(subClashPath, "/") {
+		subClashPath = "/" + subClashPath
+	}
+	if !strings.HasSuffix(subClashPath, "/") {
+		subClashPath = subClashPath + "/"
+	}
 
 	subURL := fmt.Sprintf("%s://%s%s%s", scheme, host, subPath, client.SubID)
 	subJsonURL := fmt.Sprintf("%s://%s%s%s", scheme, host, subJsonPath, client.SubID)
+	subClashURL := fmt.Sprintf("%s://%s%s%s", scheme, host, subClashPath, client.SubID)
 	if !subJsonEnable {
 		subJsonURL = ""
 	}
-	return subURL, subJsonURL, nil
+	if !subClashEnable {
+		subClashURL = ""
+	}
+	return subURL, subJsonURL, subClashURL, nil
 }
 
 // sendClientSubLinks sends the subscription links for the client to the chat.
 func (t *Tgbot) sendClientSubLinks(chatId int64, email string) {
-	subURL, subJsonURL, err := t.buildSubscriptionURLs(email)
+	subURL, subJsonURL, subClashURL, err := t.buildSubscriptionURLs(email)
 	if err != nil {
 		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.answers.errorOperation")+"\r\n"+err.Error())
 		return
@@ -2265,6 +2277,9 @@ func (t *Tgbot) sendClientSubLinks(chatId int64, email string) {
 	msg := "Subscription URL:\r\n<code>" + subURL + "</code>"
 	if subJsonURL != "" {
 		msg += "\r\n\r\nJSON URL:\r\n<code>" + subJsonURL + "</code>"
+	}
+	if subClashURL != "" {
+		msg += "\r\n\r\nClash URL:\r\n<code>" + subClashURL + "</code>"
 	}
 	inlineKeyboard := tu.InlineKeyboard(
 		tu.InlineKeyboardRow(
@@ -2280,7 +2295,7 @@ func (t *Tgbot) sendClientSubLinks(chatId int64, email string) {
 // sendClientIndividualLinks fetches the subscription content (individual links) and sends it to the user
 func (t *Tgbot) sendClientIndividualLinks(chatId int64, email string) {
 	// Build the HTML sub page URL; we'll call it with header Accept to get raw content
-	subURL, _, err := t.buildSubscriptionURLs(email)
+	subURL, _, _, err := t.buildSubscriptionURLs(email)
 	if err != nil {
 		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.answers.errorOperation")+"\r\n"+err.Error())
 		return
@@ -2361,7 +2376,7 @@ func (t *Tgbot) sendClientIndividualLinks(chatId int64, email string) {
 
 // sendClientQRLinks generates QR images for subscription URL, JSON URL, and a few individual links, then sends them
 func (t *Tgbot) sendClientQRLinks(chatId int64, email string) {
-	subURL, subJsonURL, err := t.buildSubscriptionURLs(email)
+	subURL, subJsonURL, subClashURL, err := t.buildSubscriptionURLs(email)
 	if err != nil {
 		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.answers.errorOperation")+"\r\n"+err.Error())
 		return
@@ -2395,6 +2410,19 @@ func (t *Tgbot) sendClientQRLinks(chatId int64, email string) {
 			document := tu.Document(
 				tu.ID(chatId),
 				tu.FileFromBytes(png, "subjson.png"),
+			)
+			_, _ = bot.SendDocument(context.Background(), document)
+		} else {
+			t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.answers.errorOperation")+"\r\n"+err.Error())
+		}
+	}
+
+	// Send Clash URL QR (filename: clash.png) when available
+	if subClashURL != "" {
+		if png, err := createQR(subClashURL, 320); err == nil {
+			document := tu.Document(
+				tu.ID(chatId),
+				tu.FileFromBytes(png, "clash.png"),
 			)
 			_, _ = bot.SendDocument(context.Background(), document)
 		} else {

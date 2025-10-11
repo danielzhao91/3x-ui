@@ -66,6 +66,7 @@
 "secAlertPanelURI" = "デフォルトのURIパスは安全ではありません。複雑なURIパスを設定してください。"
 "secAlertSubURI" = "サブスクリプションのデフォルトURIパスは安全ではありません。複雑なURIパスを設定してください。"
 "secAlertSubJsonURI" = "JSONサブスクリプションのデフォルトURIパスは安全ではありません。複雑なURIパスを設定してください。"
+"secAlertSubClashURI" = "CLASHサブスクリプションのデフォルトURIパスは安全ではありません。複雑なURIパスを設定してください。"
 "emptyDnsDesc" = "追加されたDNSサーバーはありません。"
 "emptyFakeDnsDesc" = "追加されたFake DNSサーバーはありません。"
 "emptyBalancersDesc" = "追加されたバランサーはありません。"
@@ -372,6 +373,7 @@
 "subEnable" = "サブスクリプションサービスを有効にする"
 "subEnableDesc" = "サブスクリプションサービス機能を有効にする"
 "subJsonEnable" = "JSON サブスクリプションのエンドポイントを個別に有効/無効にする。"
+"subClashEnable" = "CLASH サブスクリプションのエンドポイントを個別に有効/無効にする。"
 "subTitle" = "サブスクリプションタイトル"
 "subTitleDesc" = "VPNクライアントに表示されるタイトル"
 "subListen" = "監視IP"
@@ -417,6 +419,8 @@
 "information" = "情報"
 "language" = "言語"
 "telegramBotLanguage" = "Telegram Botの言語"
+"clashRuleSet" = "Clashルールセット"
+"clashRuleSetDesc" = "Clashサブスクリプションのカスタムルール"
 
 [pages.xray]
 "title" = "Xray 設定"
